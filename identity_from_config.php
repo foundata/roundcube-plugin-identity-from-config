@@ -150,7 +150,6 @@ class identity_from_config extends rcube_plugin
                     $signature = (string) $identity_from_config['signature_plaintext'];
                 }
 
-
                 // add signature to identity record, replace placeholders in the signature template with
                 // the values from the user's identity dataset or the identities ['fallback_values'] array:
                 // - %foo%: raw value of field 'foo'
