@@ -52,19 +52,22 @@ class identity_from_config extends rcube_plugin
 
             // check plugin config
             if (empty($identity_from_config) ||
-                (!array_key_exists('users', $identity_from_config) || empty($identity_from_config['users']) || !is_array($identity_from_config['users']))) {
+                (!array_key_exists('users', $identity_from_config) || empty($identity_from_config['users']) || !is_array($identity_from_config['users'])) ||
+                (!array_key_exists('fallback_values', $identity_from_config) || !is_array($identity_from_config['fallback_values'])) ||
+                !array_key_exists('signature_plaintext', $identity_from_config) ||
+                !array_key_exists('signature_html', $identity_from_config)) {
                 if ($debug_plugin) {
                     rcube::write_log('identity_from_config',
                         'The plugin config seems to be invalid, please check the defined '
                         . 'identities in $config[\'identity_from_config_identities\'] for '
-                        . 'invalid or missing \'users\' defintions.') ;
+                        . 'invalid or missing but mandatory array keys.') ;
                 }
                 return false;
             }
 
             // check if this identity has to be added for the current user
             $roundcube_username = mb_strtolower($user_data['username'], RCUBE_CHARSET); // case-insensitive search
-            foreach($identity_from_config['users'] as $identity_users_username => $identity_users_displayname) {
+            foreach($identity_from_config['users'] as $identity_users_username => $user_config_dataset) {
 
                 $search_username = mb_strtolower($identity_users_username, RCUBE_CHARSET); // case-insensitive search
                 if ($roundcube_username === $search_username) {
@@ -84,9 +87,16 @@ class identity_from_config extends rcube_plugin
                     // Add additional data to this identity from config to make some actions
                     // easier while keeping the configuration simple:
                     // - email (as it is only stored in the indentity's array key yet)
-                    // - the display name (so we do not have to search again in all subarray)
-                    $identity_from_config['user_displayname'] = $identity_users_displayname;
+                    // - email as fallback value for placeholders. So it gets used in templates
+                    //   if there is no user-specific value in $user_config_dataset.
+                    // - the whole set of user specific data (so we do not have to search again
+                    //   in all subarrays)
                     $identity_from_config['email'] = $email;
+                    if (!array_key_exists('email', $identity_from_config['fallback_values']) || empty($identity_from_config['fallback_values']['email'])) {
+                        $identity_from_config['fallback_values']['email'] = $email;
+                    }
+                    $identity_from_config['user_config_dataset'] = $user_config_dataset;
+
 
                     // copy the identity from config file to the list to be processed for the
                     // current user
@@ -125,7 +135,7 @@ class identity_from_config extends rcube_plugin
             $identity_record = [
                 'user_id' => $this->rc->user->ID,
                 'standard' => ((array_key_exists('is_standard', $identity_from_config) && !empty($identity_from_config['is_standard'])) ? 1 : 0), // 1: use the identity as default (there can only be one)
-                'name' => (!empty($identity_from_config['user_displayname']) ? $identity_from_config['user_displayname'] : $user_data['username']),
+                'name' => ((array_key_exists('name', $identity_from_config['user_config_dataset']) && !empty($identity_from_config['user_config_dataset']['name'])) ? $identity_from_config['user_config_dataset']['name'] : $user_data['username']),
                 'email' => $identity_from_config['email'],
                 'organization' => (array_key_exists('organization', $identity_from_config) ? $identity_from_config['organization'] : ''),
                 'reply-to' => (array_key_exists('reply-to', $identity_from_config) ? $identity_from_config['reply-to'] : ''),
@@ -140,25 +150,48 @@ class identity_from_config extends rcube_plugin
                     $signature = (string) $identity_from_config['signature_plaintext'];
                 }
 
-                // add signature to identity record, replace placeholders for the user's
-                // full name / display name in a signature template with
-                // - %name%: unmodified value
-                // - %name_html%: HTML entities encoded value
-                // - %name_url%: URL encoded value
-                $replace_raw = $identity_record['name'];
 
-                $replace_html = '';
-                $replace_html = htmlspecialchars($replace_raw, \ENT_NOQUOTES, RCUBE_CHARSET);
+                // add signature to identity record, replace placeholders in the signature template with
+                // the values from the user's identity dataset or the identities ['fallback_values'] array:
+                // - %foo%: raw value of field 'foo'
+                // - %foo_html%: HTML entities encoded value of field 'foo'
+                // - %foo_url%: URL encoded value of field 'foo'. Additional optimizations are
+                //   applied for the fields 'email' (usage of Punycode for email domains),
+                //   'phone' and 'fax' (stripping of chars not compatible with tel:// URLs)
+                $fieldmap = array_unique(array_merge(array_keys($identity_from_config['fallback_values']), array_keys($identity_from_config['user_config_dataset'])));
+                foreach ($fieldmap as $placeholder) {
+                    $replace_raw = '';
+                    if (array_key_exists($placeholder, $identity_from_config['user_config_dataset']) && ((string) $identity_from_config['user_config_dataset'][$placeholder] !== '')) {
+                        $replace_raw = (string) $identity_from_config['user_config_dataset'][$placeholder];
+                    } elseif (array_key_exists($placeholder, $identity_from_config['fallback_values']) && ((string) $identity_from_config['fallback_values'][$placeholder] !== '')) {
+                        $replace_raw = (string) $identity_from_config['fallback_values'][$placeholder];
+                    } elseif (array_key_exists($placeholder, $identity_record) && ((string) $identity_record[$placeholder] !== '')) {
+                        $replace_raw = (string) $identity_record[$placeholder];
+                    } else {
+                        continue;
+                    }
 
-                $replace_url = '';
-                $replace_url = urlencode($replace_raw);
+                    $replace_html = '';
+                    $replace_html = htmlspecialchars($replace_raw, \ENT_NOQUOTES, RCUBE_CHARSET);
 
-                $signature = str_replace([ '%name%',
-                                           '%name_html%',
-                                           '%name_url%' ],
-                                         [ $replace_raw,
-                                           $replace_html,
-                                           $replace_url ], $signature);
+                    $replace_url = '';
+                    if ($placeholder === 'phone' || $placeholder === 'fax') {
+                        // strip some chars for "tel://" URL usage
+                        $replace_url = urlencode(preg_replace('/[^+0-9]+/', '', $replace_raw));
+                    } elseif ($placeholder === 'email') {
+                        // use Punycode/ACE for "mailto://" URL usage
+                        $replace_url = urlencode(rcube_utils::idn_to_ascii($replace_raw));
+                    } else {
+                        $replace_url = urlencode($replace_raw);
+                    }
+
+                    $signature = str_replace([ '%'. $placeholder . '%',
+                                               '%'. $placeholder . '_html%',
+                                               '%'. $placeholder . '_url%' ],
+                                             [ $replace_raw,
+                                               $replace_html,
+                                               $replace_url ], $signature);
+                }
 
                 $identity_record['html_signature'] = ($use_html_signature) ? 1 : 0;
                 $identity_record['signature'] = ($use_html_signature && $wash_html_signature) ? rcmail_action_settings_index::wash_html($signature) : $signature; // XSS protection
@@ -188,8 +221,8 @@ class identity_from_config extends rcube_plugin
             }
 
             // Store the ID of the identity as managed. Any optionally needed cleanup
-            // action gets a lot easier if there is a list of identities known to be managed
-            // for the current user by this plugin.
+            // action gets a lot easier if there is a list of identities known to be
+            // managed for the current user by this plugin.
             $user_data['managed_identity_ids'][] = $identity_id;
         }
 

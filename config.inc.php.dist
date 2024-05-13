@@ -3,85 +3,193 @@
 // identity_from_config plugin settings
 $config = [];
 
-
-// identity data of shared email addresses
-// key: the shared email address
-// value: subarray with the data. keys:
-//        FIXME description
+// Identity data of for email addresses
+//
+// You can add one array element for each email address you want to manage
+// identities for:
+//
+// * Key: the (usually shared) email address
+// * Value: subarray with the data of the identity for the email address.
+//   Mandatory keys: "users", "signature_plaintext", and "signature_html".
+//   Optional keys: "organization", "reply-to", "bcc", "is_standard"
+//
+// Example for "info@example.com" to be configured for the Roundcube
+// users "foo", "bar" and "baz":
+//
+// $config['identity_from_config_identities'] = [
+//     'info@example.com' => [
+//         // Users array
+//         // Define for which users the identity should be added. Add one
+//         // element for each user:
+//         // - key: Roundcube username (case-insensitive)
+//         // - value: sub-array with values for the signature template. If the
+//         // 'name' key is not given, the Roundcube username will be used for
+//         // %name% placeholders in signature templates. This way, identities
+//         // of shared email addresses can still contain personalized values.
+//         'users' => [
+//             'foo' => [
+//                 'name' => 'Jane Doe',
+//                 'phone' => '+49 123 123 999',
+//             ],
+//             'bar' => [  ],
+//             'baz' => [
+//                 'name' => 'Martina Mustermann',
+//                 'organization' => 'External Oursourcing Inc.'
+//             ],
+//         ],
+//         // optional fallback values that will be used if a key defined in
+//         // the ['users'] array provides no or empty data. Just remove or add
+//         // keys you do (not) need to have fallback values for template
+//         // placeholders.
+//         'fallback_values' => [
+//             'organization' => 'ACME Inc.',
+//             'phone' => '+49 123 123 123',
+//             'website' => 'https://example.com/',
+//         ],
+//
+//         // Signature templates
+//         // You can use each key from the ['users'] subarray above as
+//         // %placeholder(_html|url)%. They will be replaced with values
+//         // from either the ['users'] or ['fallback_values'] subarray (if
+//         // there is no or empty data for this key in ['users']). Each value
+//         // is available in three ways:
+//         //
+//         // Example for 'foo':
+//         // - %foo%: raw value of 'foo'
+//         // - %foo_html%: HTML entity encoded value of 'foo'
+//         // - %foo_url%: URL encoded value of 'foo'. Additional optimizations
+//         //   are applied if the key is named 'email' (usage of Punycode for
+//         //   email domains), 'phone' or 'fax' (stripping of chars not
+//         //   compatible with tel:// URLs)
+//         //
+//         // ['signature_plaintext'] will be used
+//         // if $config['identity_from_config_use_html_signature'] is false.
+//         'signature_plaintext' =>
+//               "Kind regards\n"
+//             . "%name%\n"
+//             . "ACME Inc.\n",
+//         'signature_html' =>
+//              '<p>'
+//             .'    Kind regards<br />'
+//             .'    <strong>%name_html%</strong><br />'
+//             .'    ACME Inc.'
+//             .'</p>',
+//
+//         // Optional keys (for the corresponding fields of a Roundcube identity)
+//         //'organization' => 'ACME Inc.',
+//         //'reply-to' => 'info@example.org',
+//         //'bcc' => 'info@example.net',
+//         //'is_standard' => 0,
+//     ],
+// ];
 $config['identity_from_config_identities'] = [
-    'info@example.com' => [
-        // mandatory
-        // array to define for which users the identity should be used
-        // key: roundcube username (case-insensitive)
-        // value: full name / display name of the user (will also be used to fill
-        //        the %name% placeholders in the signature)
-        'users' => [
-            'foo' => 'Jane Doe',
-            'bar' => 'John "Displayname" Doe'
-        ],
 
-        // Signature templates
-        // the following placeholders will be replaced with the full name / display name
-        // of the matching user:
-        // - %name%: raw value.
-        // - %name_html%: HTML entities encoded value
-        // - %name_url%: URL encoded value
+    'info@example.com' => [
+        'users' => [
+            'foo' => [
+                'name' => 'Jane Doe',
+                'phone' => '+49 123 123 999',
+            ],
+            'bar' => [  ],
+            'baz' => [
+                'name' => 'Martina Mustermann',
+                'organization' => 'External Oursourcing Inc.'
+            ],
+        ],
+        'fallback_values' => [
+            'organization' => 'ACME Inc.',
+            'phone' => '+49 123 123 123',
+            'website' => 'https://example.com/',
+        ],
         'signature_plaintext' =>
               "Kind regards\n"
             . "%name%\n"
             . "ACME Inc.\n",
         'signature_html' =>
-            '<p>
-                Kind regards<br />
-                <strong>%name_html%</strong><br />
-                ACME Inc.
-            </p>',
+             '<p>'
+            .'    Kind regards<br />'
+            .'    <strong>%name_html%</strong><br />'
+            .'    ACME Inc.'
+            .'</p>',
+        'organization' => 'ACME Inc.',
+    ],
 
-        // Optional keys
-        //'organization' => 'ACME Inc.',
-        //'reply-to' => 'info@example.org',
-        //'bcc' => 'info@example.net',
-        //'is_standard' => 0,
-    ]
 ];
+
 
 
 // Switch for signature handling
 //
-// true: overwrite existing signatures on each login (not only name, organization,
-//       email and so on).
-// false: do not touch / overwrite the signature of an identity (so a user can
-//        still maintain the signature value and format in a self-reliant way)
+// true: Overwrite existing signatures on each login (not only name, organization,
+// email and other attributes).
+//
+// false: Do not touch or overwrite the signature of an identity (so a user can
+// still maintain the signature value and format in a self-reliant way).
 $config['identity_from_config_update_signatures'] = true;
 
 
 // Switch for signature format
-// true: use HTML instead of plain text signatures
+//
+// true: use HTML instead of plain text signatures.
 $config['identity_from_config_use_html_signature'] = true;
 
 
 // Switch for signature sanitation
-// true: use rcmail_action_settings_index::wash_html() on HTML signatures.
+//
+// true: Use rcmail_action_settings_index::wash_html() on HTML signatures.
 // You can disable this if you got problems with stripped HTML attributes
-// and you are sure that one you trust all data of your config in any case.
+// and you are sure that you can trust the LDAP data in any case.
 $config['identity_from_config_wash_html_signature'] = true;
 
 
 // Switch to control if unmanaged identities should be deleted.
 //
-// FIXME description
+// true: Delete all identities without a matching email address in
+// $config['identity_from_config_identities'] for the current user (=
+// identities not maintained by this plugin).
+//
+// false: Do not delete identities without a matching email address in
+// $config['identity_from_config_identities'] for the current user (=
+// identities not maintained by this plugin). These identities will remain
+// untouched until users delete them themselves or the identity is managed
+// because the email address was added to
+// $config['identity_from_config_identities'] and matched for the current
+// user.
+//
+// This setting is usually only suitable for edge cases as this plugin's
+// major use case is to deploy and maintain email identities for shared
+// mailboxes (and one usually wants to keep the other identities of a user
+// in parallel).
+//
+// You can define exceptions from this automatic cleanup by using the
+// $config['identity_from_config_exclude_delete_unmanaged_regex'] option.
+// This might be helpful for edge cases or when other plugins are in use
+// that create or influence a user's identities.
 $config['identity_from_config_delete_unmanaged'] = false;
 
 
-// Regular expression (used with preg_match()) to exclude email alias addresses
-// from automatic cleanup if $config['identity_from_config_delete_unmanaged']
-// is true.
+// Regular expression (used with preg_match()) to exclude identities with
+// matching email addresses from automatic cleanup when
+// $config['identity_from_config_delete_unmanaged'] is true.
 //
-// FIXME description
+// An empty string ('') disables the exclusion feature (= all of a user's
+// unmanaged identities are deleted). This setting has no effect if
+// $config['identity_from_config_delete_unmanaged'] is set to false (as this
+// disables the entire automatic deletion cleanup mechanism).
+//
+// Examples:
+// - '/^.+@example\.com$/im'
+//    Excludes all identities using email addresses ending with "@example.com"
+//    (case-insensitive).
+// - '/^.+@example\.(com|net|org)$/im'
+//    Excludes all identities using email addresses ending with "@example.com",
+//    "@example.net" or "@example.org" (case-insensitive)
 $config['identity_from_config_exclude_delete_unmanaged_regex'] = '';
 
 
 // Switch for logging additional debug data into the Roundcube log
 // "identity_from_config_debug".
-// true: Write useful debugging info into the log.
-$config['identity_from_config_debug'] = true; // FIXME set to false before release
+//
+// true: Write useful debugging info into the log (e.g. found or deleted
+// identities).
+$config['identity_from_config_debug'] = false;
