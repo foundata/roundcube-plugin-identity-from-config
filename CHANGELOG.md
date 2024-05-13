@@ -8,7 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Nothing worth mentioning yet.
+
+
+## [1.0.0] - 2024-05-14
+
+### Added
+
 - All functionality and files.
 
 
-[unreleased]: https://github.com/foundata/roundcube-plugin-identity-from-config/compare/v0.0.0-dev...HEAD
+[unreleased]: https://github.com/foundata/roundcube-plugin-identity-from-config/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/foundata/roundcube-plugin-identity-from-config/releases/tag/v1.0.0
