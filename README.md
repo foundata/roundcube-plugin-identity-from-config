@@ -1,7 +1,5 @@
 # Roundcube Plugin: `identity_from_config` (use config file to maintain email identities)
 
-**WARNING: NOT FOR PRODUCTION USE YET, HIGHLY EXPERIMENTAL**
-
 A [Roundcube](https://roundcube.net/) [plugin](https://plugins.roundcube.net/) to populate and maintain user email identities automatically on each login, based on corresponding data from the plugin's config file. A major use case is to maintain identities of shared mailboxes (like `info@example.com`) in a consistent and easy way, e.g. when using a [shared IMAP namespace](https://datatracker.ietf.org/doc/html/rfc2342.html).
 
 You can use this plugin in combination with [`identity_from_directory`](https://github.com/foundata/roundcube-plugin-identity-from-config) which uses LDAP or Active Directory to maintain email identities.
