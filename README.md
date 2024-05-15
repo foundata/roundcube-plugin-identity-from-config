@@ -2,7 +2,7 @@
 
 A [Roundcube](https://roundcube.net/) [plugin](https://plugins.roundcube.net/) to populate and maintain user email identities automatically on each login, based on corresponding data from the plugin's config file. A major use case is to maintain identities of shared mailboxes (like `info@example.com`) in a consistent and easy way, e.g. when using a [shared IMAP namespace](https://datatracker.ietf.org/doc/html/rfc2342.html).
 
-You can use this plugin in combination with [`identity_from_directory`](https://github.com/foundata/roundcube-plugin-identity-from-config) which uses LDAP or Active Directory to maintain email identities.
+You can use this plugin in combination with [`identity_from_directory`](https://github.com/foundata/roundcube-plugin-identity-from-directory) which uses LDAP or Active Directory to maintain email identities.
 
 
 ## Table of Contents
@@ -86,7 +86,7 @@ Some additional notes:
 
 ### When used with the `identity_from_directory` plugin
 
-Make sure to exclude the identities created by the `identity_from_config` plugin from the automatic cleanup of unmanaged identities of the [`identity_from_directory`](https://github.com/foundata/roundcube-plugin-identity-from-config) plugin:
+Make sure to exclude the identities created by the `identity_from_config` plugin from the automatic cleanup of unmanaged identities of the [`identity_from_directory`](https://github.com/foundata/roundcube-plugin-identity-from-directory) plugin:
 
 1. Edit `/plugins/identity_from_directory/config.inc.php`
 2. Set `$config['identity_from_directory_exclude_delete_unmanaged_regex']` to a fitting value like `'/^(office|info)@example\.(com|net)$/im'`, which excludes identities with the email addresses `office@example.com`, `info@example.com`, `office@example.net` and `info@example.net` from automatic cleanup (case insensitive)
