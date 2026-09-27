@@ -16,7 +16,8 @@ and the project adheres to
 
 ### Fixed
 
-- Removed false warning about productive use from `README.md` (leftover from the development version). No functional changes.
+- Removed false warning about productive use from `README.md` (leftover from the
+  development version). No functional changes.
 
 
 ## [1.0.0] - 2024-05-14
