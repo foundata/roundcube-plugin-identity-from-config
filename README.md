@@ -4,6 +4,20 @@ A [Roundcube](https://roundcube.net/) [plugin](https://plugins.roundcube.net/) t
 
 You can use this plugin in combination with [`identity_from_directory`](https://github.com/foundata/roundcube-plugin-identity-from-directory) which uses LDAP or Active Directory to maintain email identities.
 
+<!-- rumdl-disable MD033 -->
+<!-- HTML for consistent rendering across limited platform parsers -->
+<div align="center" id="project-readme-header">
+<br>
+<br>
+
+**⭐ Found this useful? Support open-source and star this project:**
+
+[![GitHub repository](https://img.shields.io/github/stars/foundata/roundcube-plugin-identity-from-config.svg)](https://github.com/foundata/roundcube-plugin-identity-from-config)
+
+<br>
+</div>
+<!-- rumdl-enable MD033 -->
+
 
 ## Table of Contents
 
