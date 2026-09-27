@@ -101,7 +101,7 @@ Make sure to exclude the identities created by the `identity_from_config` plugin
 The plugin may work with older versions then listed above, but this is not tested nor supported. We recommend using the latest stable Roundcube version and PHP 8.x, which the plugin is most tested with.
 
 
-## Licensing, copyright
+## Licensing, copyright<a id="licensing-copyright"></a>
 
 <!--REUSE-IgnoreStart-->
 <!-- rumdl-disable MD034 -->
@@ -117,6 +117,6 @@ The [`REUSE.toml`](REUSE.toml) file provides detailed licensing and copyright in
 [![REUSE status](https://api.reuse.software/badge/github.com/foundata/roundcube-plugin-identity-from-config)](https://api.reuse.software/info/github.com/foundata/roundcube-plugin-identity-from-config)
 
 
-## Author information
+## Author information<a id="author-information"></a>
 
 This [project](https://foundata.com/en/projects/) was created and is maintained by [foundata](https://foundata.com/). If you like it, you might [buy them a coffee](https://buy-me-a.coffee/roundcube-plugin-identity-from-config/).
