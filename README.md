@@ -104,7 +104,10 @@ The plugin may work with older versions then listed above, but this is not teste
 ## Licensing, copyright
 
 <!--REUSE-IgnoreStart-->
-Copyright (c) 2024, foundata GmbH (https://foundata.com)
+<!-- rumdl-disable MD034 -->
+<!-- Plain URL retained in the copyright notice for plain-text reuse. -->
+Copyright (c) 2024, [foundata GmbH](https://foundata.com/) (https://foundata.com)
+<!-- rumdl-enable MD034 -->
 
 This project is licensed under the GNU General Public License v3.0 or later (SPDX-License-Identifier: `GPL-3.0-or-later`), see [`LICENSES/GPL-3.0-or-later.txt`](LICENSES/GPL-3.0-or-later.txt) for the full text.
 
@@ -116,4 +119,4 @@ The [`REUSE.toml`](REUSE.toml) file provides detailed licensing and copyright in
 
 ## Author information
 
-This project was created and is maintained by [foundata](https://foundata.com/). If you like it, you might [buy them a coffee](https://buy-me-a.coffee/roundcube-plugin-identity-from-config/).
+This [project](https://foundata.com/en/projects/) was created and is maintained by [foundata](https://foundata.com/). If you like it, you might [buy them a coffee](https://buy-me-a.coffee/roundcube-plugin-identity-from-config/).
